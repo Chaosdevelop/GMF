@@ -11,7 +11,7 @@ namespace GMF
 
 	}
 
-	[ServiceDescriptor(ServiceLifetime.Singleton)]
+	[ServiceDescriptor(typeof(IGameStateManager), ServiceLifetime.Singleton)]
 	public class GameStateManager : IGameStateManager
 	{
 

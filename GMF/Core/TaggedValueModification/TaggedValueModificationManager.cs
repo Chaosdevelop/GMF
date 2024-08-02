@@ -14,55 +14,127 @@ namespace GMF.Tags
 	public static class TaggedValueModificationManager
 	{
 
-		static List<ITaggedValue> values = new List<ITaggedValue>();
+		//static HashSet<ITaggedValue> values = new HashSet<ITaggedValue>();
 
-		static List<ITaggedModifier> modifiers = new List<ITaggedModifier>();
-		static Dictionary<ITaggedValue, bool> valuesDictionary = new Dictionary<ITaggedValue, bool>();
+		static HashSet<ITaggedModifier> modifiers = new HashSet<ITaggedModifier>();
 
-		public static bool Registered(ITaggedValue taggedValue)
-		{
-			return valuesDictionary.ContainsKey(taggedValue);
-		}
+		static Dictionary<ITaggedValue, HashSet<ITaggedModifier>> valuesMods = new Dictionary<ITaggedValue, HashSet<ITaggedModifier>>();
+
+
 		public static void AddModifier(ITaggedModifier modifier)
 		{
-			modifiers.Add(modifier);
-			foreach (var taggedValue in values)
+			var success = modifiers.Add(modifier);
+			if (!success) return;
+
+			foreach (var kvp in valuesMods)
 			{
-				var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-				if (mods.Any())
+				var taggedValue = kvp.Key;
+				var correct = TagManager.IsSubsetOf(taggedValue.Tags, modifier.Tags);
+				if (correct)
 				{
-					taggedValue.ApplyModifiers(mods.ToList());
+					kvp.Value.Add(modifier);
+					taggedValue.ApplyModifiers(kvp.Value);
 				}
 
+
 			}
+
+			/*			foreach (var taggedValue in values)
+						{
+							var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
+							if (mods.Any())
+							{
+								taggedValue.ApplyModifiers(mods.ToList());
+							}
+
+						}*/
+		}
+
+		public static void AddModifiers(IEnumerable<ITaggedModifier> newmodifiers)
+		{
+			foreach (var mod in newmodifiers)
+			{
+				AddModifier(mod);
+			}
+
+			/*			foreach (var mod in newmodifiers)
+						{
+							modifiers.Add(mod);
+						}
+						foreach (var taggedValue in values)
+						{
+							var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
+							if (mods.Any())
+							{
+								taggedValue.ApplyModifiers(mods.ToList());
+							}
+
+						}*/
 		}
 
 		public static void RemoveModifier(ITaggedModifier modifier)
 		{
 			modifiers.Remove(modifier);
-			foreach (var taggedValue in values)
+			foreach (var kvp in valuesMods)
 			{
-				var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-				if (mods.Any())
+				var taggedValue = kvp.Key;
+				var correct = TagManager.IsSubsetOf(taggedValue.Tags, modifier.Tags);
+				if (correct)
 				{
-					taggedValue.ApplyModifiers(mods.ToList());
+					kvp.Value.Remove(modifier);
+					taggedValue.ApplyModifiers(kvp.Value);
 				}
-
 			}
+
+
+			/*			foreach (var taggedValue in values)
+						{
+							*//*				var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
+											if (mods.Any())
+											{
+												taggedValue.ApplyModifiers(mods.ToList());
+											}*//*
+							var correct = TagManager.IsSubsetOf(taggedValue.Tags, modifier.Tags);
+							if (correct)
+							{
+								taggedValue.ApplyModifiers(mods.ToList());
+							}
+						}*/
 		}
+
+		public static void RemoveModifiers(IEnumerable<ITaggedModifier> newmodifiers)
+		{
+			foreach (var mod in newmodifiers)
+			{
+				RemoveModifier(mod);
+			}
+
+		}
+
+
 
 		public static void AddValue(ITaggedValue taggedValue)
 		{
-			values.Add(taggedValue);
-			var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
+			if (!valuesMods.ContainsKey(taggedValue))
+			{
+				var valuemods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags)).ToHashSet();
+				valuesMods.Add(taggedValue, valuemods);
+				taggedValue.ApplyModifiers(valuemods);
+			}
 
-			taggedValue.ApplyModifiers(mods.ToList());
+
+
+			/*			values.Add(taggedValue);
+						var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
+
+						taggedValue.ApplyModifiers(mods.ToList());*/
 
 		}
 
 		public static void RemoveValue(ITaggedValue taggedValue)
 		{
-			values.Remove(taggedValue);
+			valuesMods.Remove(taggedValue);
+			/*			values.Remove(taggedValue);*/
 		}
 
 	}

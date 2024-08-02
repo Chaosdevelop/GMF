@@ -30,6 +30,7 @@ public class TagContainerDrawer : PropertyDrawer
 		{
 			var tagremove = TagManager.GetTagById(tagIds[removeIndex]);
 			var parent = GetParentObject(property);
+			deepValues.Clear();
 			RemoveTag(parent, tagremove);
 		}
 
@@ -41,40 +42,13 @@ public class TagContainerDrawer : PropertyDrawer
 		{
 			var tagadd = TagManager.GetTagById(tagIds[addIndex]);
 			var parent = GetParentObject(property);
+
+			deepValues.Clear();
 			AddTag(parent, tagadd);
 		}
 
-
-
-
-		//if (EditorGUI.EndChangeCheck())
-		{
-
-
-			/*			// �������� ������ ��������
-						var targetObject = property.serializedObject.targetObject;
-
-						// ���������� Reflection ��� ��������� �������� ��������
-
-						var fieldInfo = targetObject.GetType().GetProperty("TaggedContainer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-
-						if (fieldInfo != null)
-						{
-							var fieldValue = fieldInfo.GetValue(targetObject);
-
-							// ���������, ��������� �� �������� �������� ��������� ITaggedContainer
-							if (fieldValue is TaggedContainerController taggedContainer)
-							{
-								// �������� ����� Update �� �������� ��������
-								*//*					taggedContainer.Update();
-													var parent = GetParentObject(property);
-													AddTags<ITaggedValue>(parent, taggedContainer.GeneralTags);*//*
-
-							}
-						}*/
-		}
-
 	}
+
 	private static IEnumerable<FieldInfo> GetAllFields(Type type)
 	{
 		if (type == null)
@@ -93,45 +67,66 @@ public class TagContainerDrawer : PropertyDrawer
 		return fields;
 	}
 
+	HashSet<object> deepValues = new HashSet<object>();
+
 	void AddTag(object parent, ITag tag)
 	{
+		if (deepValues.Contains(parent)) return;
+		deepValues.Add(parent);
+
 		var fields = GetAllFields(parent.GetType());
 
 		foreach (var field in fields)
 		{
 			var disable = field.FieldType.GetCustomAttribute<DisableGeneralTagsAttribute>() != null;
-			if (!disable)
+			if (disable) continue;
+
+			var fieldValue = field.GetValue(parent);
+			if (fieldValue == null) continue;
+
+			// Check if the field is of type ITagged
+			if (typeof(ITagged).IsAssignableFrom(field.FieldType))
 			{
-				var fieldValue = field.GetValue(parent);
-				if (fieldValue != null)
+				var method = typeof(ITagged).GetMethod("Add", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				method?.Invoke(fieldValue, new object[] { tag });
+				AddTag(fieldValue, tag);
+			}
+			// Check if the field is a collection of ITagged
+			else if (typeof(IEnumerable<ITagged>).IsAssignableFrom(field.FieldType))
+			{
+				var collection = fieldValue as IEnumerable<ITagged>;
+				foreach (var item in collection)
 				{
-					// Check if the field is of type ITagged
-					if (typeof(ITagged).IsAssignableFrom(field.FieldType))
+					if (item != null && typeof(ITagged).IsAssignableFrom(item.GetType()))
 					{
 						var method = typeof(ITagged).GetMethod("Add", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-						method?.Invoke(fieldValue, new object[] { tag });
-						AddTag(fieldValue, tag);
-					}
-					// Check if the field is a collection of ITagged
-					else if (typeof(IEnumerable<ITagged>).IsAssignableFrom(field.FieldType))
-					{
-						var collection = fieldValue as IEnumerable<ITagged>;
-						foreach (var item in collection)
-						{
-							if (item != null && typeof(ITagged).IsAssignableFrom(item.GetType()))
-							{
-								var method = typeof(ITagged).GetMethod("Add", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								method?.Invoke(item, new object[] { tag });
-								AddTag(item, tag);
-							}
-						}
+						method?.Invoke(item, new object[] { tag });
+						AddTag(item, tag);
 					}
 				}
 			}
+			/*
+						if (typeof(IEnumerable).IsAssignableFrom(field.FieldType))
+						{
+							var collection = fieldValue as IEnumerable;
+							foreach (var item in collection)
+							{
+								AddTag(item, tag);
+							}
+						}
+						else
+						{
+							AddTag(fieldValue, tag);
+						}*/
+
+
 		}
 	}
 	void RemoveTag(object parent, ITag tag)
 	{
+		if (deepValues.Contains(parent)) return;
+		deepValues.Add(parent);
+
 		var fields = GetAllFields(parent.GetType());
 
 		foreach (var field in fields)
@@ -163,6 +158,19 @@ public class TagContainerDrawer : PropertyDrawer
 							}
 						}
 					}
+					/*
+										if (typeof(IEnumerable).IsAssignableFrom(field.FieldType))
+										{
+											var collection = fieldValue as IEnumerable;
+											foreach (var item in collection)
+											{
+												RemoveTag(item, tag);
+											}
+										}
+										else
+										{
+											RemoveTag(fieldValue, tag);
+										}*/
 				}
 			}
 		}

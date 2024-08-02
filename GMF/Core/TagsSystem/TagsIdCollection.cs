@@ -98,7 +98,7 @@ namespace GMF.Tags
 
 		public override string ToString()
 		{
-			return string.Join(", ", tagIds);
+			return string.Join(", ", GetAsTags());
 		}
 	}
 }

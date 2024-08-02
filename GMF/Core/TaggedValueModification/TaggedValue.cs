@@ -24,7 +24,7 @@ namespace GMF.Tags
 	public interface ITaggedValue : ITagged
 	{
 
-		void ApplyModifiers(List<ITaggedModifier> modifiers);
+		void ApplyModifiers(HashSet<ITaggedModifier> modifiers);
 		void Register();
 		void Unregister();
 
@@ -71,7 +71,7 @@ namespace GMF.Tags
 			Unregister();
 		}
 
-		public abstract void ApplyModifiers(List<ITaggedModifier> modifiers);
+		public abstract void ApplyModifiers(HashSet<ITaggedModifier> modifiers);
 		public void Register()
 		{
 			registered = true;
@@ -101,7 +101,7 @@ namespace GMF.Tags
 	[System.Serializable]
 	public class TaggedIntValue : TaggedValue<int>
 	{
-		public override void ApplyModifiers(List<ITaggedModifier> modifiers)
+		public override void ApplyModifiers(HashSet<ITaggedModifier> modifiers)
 		{
 			//Debug.Log(string.Join(" ", modifiers.Select(arg => arg.ToString())));
 			float floatValue = DefaultValue;
@@ -142,7 +142,7 @@ namespace GMF.Tags
 	[System.Serializable]
 	public class TaggedFloatValue : TaggedValue<float>
 	{
-		public override void ApplyModifiers(List<ITaggedModifier> modifiers)
+		public override void ApplyModifiers(HashSet<ITaggedModifier> modifiers)
 		{
 			float floatValue = DefaultValue;
 			foreach (var modifier in modifiers.OrderBy(m => m.Order))

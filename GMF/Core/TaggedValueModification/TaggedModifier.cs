@@ -46,6 +46,9 @@ namespace GMF.Tags
 			return MemberwiseClone() as TaggedModifier;
 		}
 
-
+		public override string ToString()
+		{
+			return $"Tags: {tags} Modifier: {category} {modifier}";
+		}
 	}
 }
