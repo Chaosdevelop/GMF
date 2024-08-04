@@ -32,6 +32,7 @@ public class TagContainerDrawer : PropertyDrawer
 			var parent = GetParentObject(property);
 			deepValues.Clear();
 			RemoveTag(parent, tagremove);
+			EditorUtility.SetDirty(property.serializedObject.targetObject);
 		}
 
 		int addIndex = -1;
@@ -45,6 +46,7 @@ public class TagContainerDrawer : PropertyDrawer
 
 			deepValues.Clear();
 			AddTag(parent, tagadd);
+			EditorUtility.SetDirty(property.serializedObject.targetObject);
 		}
 
 	}
