@@ -18,7 +18,7 @@ public class TagContainerDrawer : PropertyDrawer
 		//EditorGUI.PropertyField(position, property, label, true);
 
 		var tags = TagManager.GetAllTags();
-		string[] tagNames = tags.Select(t => (t as Tag).ToDropdownString()).ToArray();
+		string[] tagNames = tags.Select(t => (t as Tag).GetGroupedName(50)).ToArray();
 		uint[] tagIds = tags.Select(t => t.Id).ToArray();
 
 		int removeIndex = -1;

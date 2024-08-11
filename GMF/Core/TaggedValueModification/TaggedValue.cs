@@ -38,7 +38,7 @@ namespace GMF.Tags
 		public T DefaultValue { get; private set; }
 
 		[field: SerializeField]
-		public TagsIdCollection Tags { get; private set; }
+		public TagsIdCollection Tags { get; private set; } = new TagsIdCollection();
 
 		public T CurrentValue {
 			get {
@@ -107,7 +107,7 @@ namespace GMF.Tags
 			float floatValue = DefaultValue;
 			foreach (var modifier in modifiers.OrderBy(m => m.Order))
 			{
-
+				//Need to fix order
 				switch (modifier.Category)
 				{
 					case TagStackableCategory.BaseOverride:

@@ -14,8 +14,6 @@ namespace GMF.Tags
 	public static class TaggedValueModificationManager
 	{
 
-		//static HashSet<ITaggedValue> values = new HashSet<ITaggedValue>();
-
 		static HashSet<ITaggedModifier> modifiers = new HashSet<ITaggedModifier>();
 
 		static Dictionary<ITaggedValue, HashSet<ITaggedModifier>> valuesMods = new Dictionary<ITaggedValue, HashSet<ITaggedModifier>>();
@@ -39,15 +37,6 @@ namespace GMF.Tags
 
 			}
 
-			/*			foreach (var taggedValue in values)
-						{
-							var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-							if (mods.Any())
-							{
-								taggedValue.ApplyModifiers(mods.ToList());
-							}
-
-						}*/
 		}
 
 		public static void AddModifiers(IEnumerable<ITaggedModifier> newmodifiers)
@@ -56,20 +45,6 @@ namespace GMF.Tags
 			{
 				AddModifier(mod);
 			}
-
-			/*			foreach (var mod in newmodifiers)
-						{
-							modifiers.Add(mod);
-						}
-						foreach (var taggedValue in values)
-						{
-							var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-							if (mods.Any())
-							{
-								taggedValue.ApplyModifiers(mods.ToList());
-							}
-
-						}*/
 		}
 
 		public static void RemoveModifier(ITaggedModifier modifier)
@@ -86,20 +61,6 @@ namespace GMF.Tags
 				}
 			}
 
-
-			/*			foreach (var taggedValue in values)
-						{
-							*//*				var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-											if (mods.Any())
-											{
-												taggedValue.ApplyModifiers(mods.ToList());
-											}*//*
-							var correct = TagManager.IsSubsetOf(taggedValue.Tags, modifier.Tags);
-							if (correct)
-							{
-								taggedValue.ApplyModifiers(mods.ToList());
-							}
-						}*/
 		}
 
 		public static void RemoveModifiers(IEnumerable<ITaggedModifier> newmodifiers)
@@ -122,19 +83,11 @@ namespace GMF.Tags
 				taggedValue.ApplyModifiers(valuemods);
 			}
 
-
-
-			/*			values.Add(taggedValue);
-						var mods = modifiers.Where(arg => TagManager.IsSubsetOf(taggedValue.Tags, arg.Tags));
-
-						taggedValue.ApplyModifiers(mods.ToList());*/
-
 		}
 
 		public static void RemoveValue(ITaggedValue taggedValue)
 		{
 			valuesMods.Remove(taggedValue);
-			/*			values.Remove(taggedValue);*/
 		}
 
 	}

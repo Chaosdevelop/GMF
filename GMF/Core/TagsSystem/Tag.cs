@@ -5,91 +5,96 @@ using UnityEngine;
 
 namespace GMF.Tags
 {
-    [Serializable]
-    public class Tag : ITag
-    {
-        [field: SerializeField]
-        [field: HideInInspector]
-        public uint Id { get; private set; }
-        
-        [field: SerializeField]
-        public string Name { get; set; }
-        
-        //[SerializeField]
-        //Tag[] subTags;
-        [field: SerializeField]
-        public TagsIdCollection SubTagIds { get; private set; } = new TagsIdCollection();
+	[Serializable]
+	public class Tag : ITag
+	{
+		[field: SerializeField]
+		[field: HideInInspector]
+		public uint Id { get; private set; }
 
-        public Tag(uint id, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException("Tag name cannot be null or empty.", nameof(name));
-            }
-            
-            Id = id;
-            Name = name;
-        }
+		[field: SerializeField]
+		public string Name { get; set; }
 
-        public void AddSubTag(ITag subTag)
-        {
-            if (subTag == null)
-            {
-                throw new ArgumentNullException(nameof(subTag));
-            }
-            
-            SubTagIds.Add(new TagId(subTag.Id));
-        }
+		//[SerializeField]
+		//Tag[] subTags;
+		[field: SerializeField]
+		public TagsIdCollection SubTagIds { get; private set; } = new TagsIdCollection();
 
-        public bool ContainsTag(ITag tag)
-        {
-            if (tag == null)
-            {
-                throw new ArgumentNullException(nameof(tag));
-            }
-            
-            return Id == tag.Id || SubTagIds.Contains(tag);
-        }
+		public Tag(uint id, string name)
+		{
+			if (string.IsNullOrEmpty(name))
+			{
+				throw new ArgumentException("Tag name cannot be null or empty.", nameof(name));
+			}
 
-        public IEnumerable<ITag> GetSubTags()
-        {
-            return SubTagIds.GetAsTags();
-        }
+			Id = id;
+			Name = name;
+		}
 
-        public IEnumerable<ITag> GetAllTags()
-        {
-            var allTags = new List<ITag> { this };
-            allTags.AddRange(SubTagIds.GetAsTags());
+		public void AddSubTag(ITag subTag)
+		{
+			if (subTag == null)
+			{
+				throw new ArgumentNullException(nameof(subTag));
+			}
 
-            return allTags;
-        }
+			SubTagIds.Add(new TagId(subTag.Id));
+		}
 
-        public void RemoveSubTag(ITag subTag)
-        {
-            SubTagIds.Remove(new TagId(subTag.Id));
-        }
-        
-        public bool Equals(ITag other)
-        {
-            return other is not null && Id == other.Id;
-        }
-        
-        public override string ToString()
-        {
-            return $"{Name} (ID: {Id})";
-        }
+		public bool ContainsTag(ITag tag)
+		{
+			if (tag == null)
+			{
+				throw new ArgumentNullException(nameof(tag));
+			}
 
-        public string ToDropdownString()
-        {
-            if (SubTagIds.IsEmpty)
-            {
-                return Name;
-            }
-            
-            var subTagNames = string.Join(", ", SubTagIds.GetAsTags().Select(t => t.Name));
-            return $"{Name} ({subTagNames})";
-            
-            /*			if (subTags != null && subTags.Length > 0)
+			return Id == tag.Id || SubTagIds.Contains(tag);
+		}
+
+		public IEnumerable<ITag> GetSubTags()
+		{
+			return SubTagIds.GetAsTags();
+		}
+
+		public IEnumerable<ITag> GetAllTags()
+		{
+			var allTags = new List<ITag> { this };
+			allTags.AddRange(SubTagIds.GetAsTags());
+
+			return allTags;
+		}
+
+		public void RemoveSubTag(ITag subTag)
+		{
+			SubTagIds.Remove(new TagId(subTag.Id));
+		}
+
+		public bool Equals(ITag other)
+		{
+			return other is not null && Id == other.Id;
+		}
+
+		public override string ToString()
+		{
+			return $"{Name} (ID: {Id})";
+		}
+
+		public string GetGroupedName(int substringLenght = 0)
+		{
+			if (SubTagIds.IsEmpty)
+			{
+				return Name;
+			}
+
+			var subTagNames = string.Join(", ", SubTagIds.GetAsTags().Select(t => t.Name));
+			if (substringLenght > 0)
+			{
+				subTagNames = subTagNames.Substring(0, Mathf.Min(substringLenght, subTagNames.Length));
+			}
+
+			return $"{Name} ({subTagNames})";
+
+			/*			if (subTags != null && subTags.Length > 0)
                         {
                             var subTagNames = string.Join(", ", subTags.Select(t => t.Name));
                             return $"{Name} ({subTagNames})";
@@ -98,9 +103,9 @@ namespace GMF.Tags
                         {
                             return Name;
                         }*/
-        }
+		}
 
-    }
+	}
 
 
 }
