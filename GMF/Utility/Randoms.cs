@@ -402,6 +402,15 @@ namespace GMF
 		}
 
 		/// <summary>
+		/// Remove a weighted option.
+		/// </summary>
+		/// <param name="item">The weighted item.</param>
+		public void RemoveOption(T item)
+		{
+			options.RemoveAll(arg => arg.item?.Equals(item) ?? item == null);
+		}
+
+		/// <summary>
 		/// Gets a weighted random option.
 		/// </summary>
 		/// <returns>A weighted random option.</returns>

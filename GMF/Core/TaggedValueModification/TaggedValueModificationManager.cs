@@ -17,6 +17,8 @@ namespace GMF.Tags
 		static HashSet<ITaggedModifier> modifiers = new HashSet<ITaggedModifier>();
 
 		static Dictionary<ITaggedValue, HashSet<ITaggedModifier>> valuesMods = new Dictionary<ITaggedValue, HashSet<ITaggedModifier>>();
+		//TO DO: add fast update
+		//static Dictionary<ITaggedModifier, HashSet<ITaggedValue>> modsValues = new Dictionary<ITaggedModifier, HashSet<ITaggedValue>>();
 
 
 		public static void AddModifier(ITaggedModifier modifier)
@@ -73,6 +75,20 @@ namespace GMF.Tags
 		}
 
 
+		public static void UpdateModifier(ITaggedModifier modifier)
+		{
+
+			foreach (var kvp in valuesMods)
+			{
+				var taggedValue = kvp.Key;
+				var correct = TagManager.IsSubsetOf(taggedValue.Tags, modifier.Tags);
+				if (correct)
+				{
+					taggedValue.ApplyModifiers(kvp.Value);
+				}
+			}
+
+		}
 
 		public static void AddValue(ITaggedValue taggedValue)
 		{
@@ -90,5 +106,14 @@ namespace GMF.Tags
 			valuesMods.Remove(taggedValue);
 		}
 
+		public static void Reset()
+		{
+			modifiers.Clear();
+			var vals = valuesMods.Keys.ToArray();
+			foreach (var item in vals)
+			{
+				item.Unregister();
+			}
+		}
 	}
 }

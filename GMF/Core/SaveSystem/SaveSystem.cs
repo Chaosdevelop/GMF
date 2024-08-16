@@ -108,5 +108,11 @@ namespace GMF.Saving
 		{
 			return SaveLoadManager.AutoLoadAsync();
 		}
+
+		public static void ResetSave()
+		{
+			SaveLoadManager.DeleteAsync(CurrentSaveSlot).GetAwaiter().GetResult();
+			SaveLoadManager.LoadAsync(CurrentSaveSlot).GetAwaiter().GetResult();
+		}
 	}
 }

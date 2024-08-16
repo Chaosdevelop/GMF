@@ -15,7 +15,7 @@ namespace GMF.Editor
 		const float KeyMinWidth = 150;
 		const float KeyRelativeWidth = 0.4f;
 		float height;
-
+		bool foldout;
 		/// <summary>
 		/// Renders the custom property in the Unity editor.
 		/// </summary>
@@ -35,58 +35,63 @@ namespace GMF.Editor
 			{
 				height = EditorGUIUtility.singleLineHeight
 			};
-			EditorGUI.LabelField(rect, label);
-			EditorGUI.indentLevel++;
-			rect.y += EditorGUIUtility.singleLineHeight;
 
-			for (int i = 0; i < size; i++)
+			foldout = EditorGUI.BeginFoldoutHeaderGroup(rect, foldout, label);
+			if (!foldout)
 			{
-				var pairProp = listProp.GetArrayElementAtIndex(i);
-				var keyProp = pairProp.FindPropertyRelative("key");
-				var valueProp = pairProp.FindPropertyRelative("value");
+				var valuesRect = new Rect(rect);
+				valuesRect.y += EditorGUIUtility.singleLineHeight;
 
-				var keyRect = new Rect(rect)
+				for (int i = 0; i < size; i++)
 				{
-					width = Mathf.Max(rect.width * KeyRelativeWidth, KeyMinWidth)
-				};
-				var valueRect = new Rect(rect)
-				{
-					width = rect.width - keyRect.width,
-					x = keyRect.x + keyRect.width
-				};
+					var pairProp = listProp.GetArrayElementAtIndex(i);
+					var keyProp = pairProp.FindPropertyRelative("key");
+					var valueProp = pairProp.FindPropertyRelative("value");
 
-				var enumVal = (System.Enum)System.Enum.ToObject(enumType, keyProp.enumValueFlag);
-				var enumGroup = enumVal.GetAttributeOfType<EnumGroupAttribute>();
-				var enumGroupOnly = fieldInfo.GetCustomAttributes(typeof(OnlyEnumGroupsAttribute), true).FirstOrDefault() as OnlyEnumGroupsAttribute;
-				bool addEnum = enumGroupOnly == null || (enumGroup != null && enumGroup.GroupNames.Intersect(enumGroupOnly.GroupNames).Any());
-
-				if (enumGroup != null)
-				{
-					var enumGroupExcept = fieldInfo.GetCustomAttributes(typeof(ExceptEnumGroupsAttribute), true).FirstOrDefault() as ExceptEnumGroupsAttribute;
-					if (enumGroupExcept != null && addEnum)
+					var keyRect = new Rect(valuesRect)
 					{
-						addEnum = !enumGroup.GroupNames.Intersect(enumGroupExcept.GroupNames).Any();
+						width = Mathf.Max(valuesRect.width * KeyRelativeWidth, KeyMinWidth)
+					};
+					var valueRect = new Rect(valuesRect)
+					{
+						width = valuesRect.width - keyRect.width,
+						x = keyRect.x + keyRect.width
+					};
+
+					var enumVal = (System.Enum)System.Enum.ToObject(enumType, keyProp.enumValueFlag);
+					var enumGroup = enumVal.GetAttributeOfType<EnumGroupAttribute>();
+					var enumGroupOnly = fieldInfo.GetCustomAttributes(typeof(OnlyEnumGroupsAttribute), true).FirstOrDefault() as OnlyEnumGroupsAttribute;
+					bool addEnum = enumGroupOnly == null || (enumGroup != null && enumGroup.GroupNames.Intersect(enumGroupOnly.GroupNames).Any());
+
+					if (enumGroup != null)
+					{
+						var enumGroupExcept = fieldInfo.GetCustomAttributes(typeof(ExceptEnumGroupsAttribute), true).FirstOrDefault() as ExceptEnumGroupsAttribute;
+						if (enumGroupExcept != null && addEnum)
+						{
+							addEnum = !enumGroup.GroupNames.Intersect(enumGroupExcept.GroupNames).Any();
+						}
+					}
+
+					if (addEnum)
+					{
+						EditorGUI.PropertyField(keyRect, keyProp, GUIContent.none, true);
+						if (valueProp != null)
+						{
+							EditorGUI.PropertyField(valueRect, valueProp, GUIContent.none, true);
+							valuesRect.y += EditorGUI.GetPropertyHeight(valueProp);
+						}
+						else
+						{
+							EditorGUI.LabelField(valueRect, new GUIContent("Non serializable value"));
+							rect.y += EditorGUI.GetPropertyHeight(keyProp);
+						}
 					}
 				}
 
-				if (addEnum)
-				{
-					EditorGUI.PropertyField(keyRect, keyProp, GUIContent.none, true);
-					if (valueProp != null)
-					{
-						EditorGUI.PropertyField(valueRect, valueProp, GUIContent.none, true);
-						rect.y += EditorGUI.GetPropertyHeight(valueProp);
-					}
-					else
-					{
-						EditorGUI.LabelField(valueRect, new GUIContent("Non serializable value"));
-						rect.y += EditorGUI.GetPropertyHeight(keyProp);
-					}
-				}
+				height = valuesRect.y - position.y;
 			}
+			EditorGUI.EndFoldoutHeaderGroup();
 
-			height = rect.y - position.y;
-			EditorGUI.indentLevel--;
 		}
 
 		/// <summary>

@@ -79,6 +79,14 @@ namespace GMF.Tags
 			// UnityEngine.Debug.Log($"issubset : {issubset}, this: {string.Join(' ', tags.Select(arg => arg.ToString()))}, other: {string.Join(' ', tagsOther.Select(arg => arg.ToString()))}");
 			return issubset;
 		}
+		public static bool IsSame(ITagsIdCollection thisCollection, ITagsIdCollection otherCollection)
+		{
+			var tags = thisCollection.GetAsTags();
+			var tagsOther = otherCollection.GetAsTags();
+			bool issubset = tags.Count > 0 && tagsOther.Count > 0 && tags.Intersect(tagsOther).Count() == tags.Count;
 
+			// UnityEngine.Debug.Log($"IsSame : {issubset}, this: {string.Join(' ', tags.Select(arg => arg.ToString()))}, other: {string.Join(' ', tagsOther.Select(arg => arg.ToString()))}");
+			return issubset;
+		}
 	}
 }

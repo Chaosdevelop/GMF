@@ -17,7 +17,10 @@ public class TagIdPropertyDrawer : PropertyDrawer
 		Tag tag = TagManager.GetTagById(id) as Tag;
 		string[] tagNames = TagManager.GetAllTags().Select(t => (t as Tag).GetGroupedName(50)).ToArray();
 		uint[] tagIds = TagManager.GetAllTags().Select(t => t.Id).ToArray();
-
+		if (id == 0 && tagIds.Length > 0)
+		{
+			idProperty.uintValue = tagIds.FirstOrDefault();
+		}
 		int selectedIndex = Mathf.Max(0, System.Array.IndexOf(tagIds, id));
 
 		EditorGUI.BeginChangeCheck();
