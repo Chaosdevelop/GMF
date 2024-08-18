@@ -84,12 +84,17 @@ namespace GMF.Tags
 		{
 			TaggedValueModificationManager.RemoveValue(this);
 			registered = false;
+			changedEvent = null;
 		}
 		public void Subscribe(Action<T> subscribe)
 		{
 			changedEvent += subscribe;
+			subscribe.Invoke(CurrentValue);
 		}
-
+		public void Unsubscribe(Action<T> subscribe)
+		{
+			changedEvent -= subscribe;
+		}
 
 		public static implicit operator T(TaggedValue<T> taggedValue)
 		{
